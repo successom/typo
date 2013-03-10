@@ -146,8 +146,23 @@
     <ul id='attachments' class='inputs-list'>
       <%= render 'admin/content/attachment', { :attachment_num => 1, :hidden => false } -%>
     </ul>
-  </div>    
+  </div>
+
+    <h4><%= _("Merge Articles") %></h4>
+
+    <div class=''>
+      <%= ("Article ID") %>
+      <%= text_field 'article', 'keywords', {:autocomplete => 'off', :style => 'width: 10%'} %>
+      <br/>
+      <br/>      
+      <input id='save_merge' type="submit" value="<%= _('Merge') %>" name="article[merge => merge]" class='btn info' />
+
+    </div>
+     
   </div>
 
 </div>
+<hr />
+
+<%= params.inspect %>
 

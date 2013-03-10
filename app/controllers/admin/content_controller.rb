@@ -24,6 +24,7 @@ class Admin::ContentController < Admin::BaseController
   end
 
   def new
+
     new_or_edit
   end
 
@@ -140,6 +141,7 @@ class Admin::ContentController < Admin::BaseController
   def real_action_for(action); { 'add' => :<<, 'remove' => :delete}[action]; end
 
   def new_or_edit
+
     id = params[:id]
     id = params[:article][:id] if params[:article] && params[:article][:id]
     @article = Article.get_or_build_article(id)
@@ -167,6 +169,9 @@ class Admin::ContentController < Admin::BaseController
       save_attachments
       
       @article.state = "draft" if @article.draft
+
+      #@article.state = "merge" if @article.draft == "Merge"
+      #binding.pry
 
       if @article.save
         destroy_the_draft unless @article.draft
@@ -240,4 +245,8 @@ class Admin::ContentController < Admin::BaseController
   def setup_resources
     @resources = Resource.by_created_at
   end
+
+  def merge_articles
+
+  end  
 end
