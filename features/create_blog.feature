@@ -12,4 +12,4 @@ Feature: Create Blog
     Given the blog is set up
     When I am on the home page
     Then I should not see "My Shiny Weblog!"
-    And I should see "Teh Blag"
+    And I should see "Teh Blog"

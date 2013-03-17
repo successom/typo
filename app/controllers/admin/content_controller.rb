@@ -21,6 +21,7 @@ class Admin::ContentController < Admin::BaseController
     else
       @article = Article.new(params[:article])
     end
+
   end
 
   def new
@@ -159,7 +160,8 @@ class Admin::ContentController < Admin::BaseController
     end
 
     @article.keywords = Tag.collection_to_string @article.tags
-    @article.attributes = params[:article]
+
+    @article.attributes = params[:article] 
     # TODO: Consider refactoring, because double rescue looks... weird.
         
     @article.published_at = DateTime.strptime(params[:article][:published_at], "%B %e, %Y %I:%M %p GMT%z").utc rescue Time.parse(params[:article][:published_at]).utc rescue nil
@@ -185,6 +187,7 @@ class Admin::ContentController < Admin::BaseController
     @images = Resource.images_by_created_at.page(params[:page]).per(10)
     @resources = Resource.without_images_by_filename
     @macros = TextFilter.macro_filters
+
     render 'new'
   end
 
@@ -246,7 +249,30 @@ class Admin::ContentController < Admin::BaseController
     @resources = Resource.by_created_at
   end
 
-  def merge_articles
+  def merge
+    @base_article_id, @other_article_id = params[:base_article], params[:merge_with]
+    begin
+    @article = Article.find(@base_article_id).merge_with(@other_article_id)
 
-  end  
+    if @article.save
+
+      ## Handle Comments
+      @feedbacks = Feedback.where(:article_id => [@base_article_id, @other_article_id])
+      @feedbacks.each do |f|
+        f.article_id = @article.id
+        f.save
+      end
+
+      ## Handle merged articles
+      Article.destroy_all(:id => [@base_article_id, @other_article_id])
+
+      flash[:notice] = _("Article ##{@base_article_id} successfully merged with ##{@other_article_id} into the new Article##{@article.id}!")
+      redirect_to :action => 'index'
+      return
+    end
+  rescue
+    flash[:warning] = _("No such article exists!")
+    redirect_to :action => 'index'
+  end
+ end
 end
