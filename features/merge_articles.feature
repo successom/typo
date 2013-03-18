@@ -21,15 +21,29 @@ Feature: Merge Articles
     When I fill in "article_title" with "Hello Rails!"
     And I fill in "article__body_and_extended_editor" with "Great framework!"
     And I press "Publish"
-    Then I should be on the admin content page
-    When I go to the home page
     Then I should see "Hello Rails!"
-    When I follow "Hello Rails!"
-    Then I should see "Great framework!"
+    
 
+    Given I am on the admin content page
     When I follow "Hello Rails!"
-    And I fill in "article_id" with "Hello Ruby!"
-    And I press "Merge"    
+    Then I should see "Merge Articles"
+    When I fill in "merge_with" with "3"
+    And I press "Merge"
+    Then I should see "Hello Rails!"
+    And I should not see "Hello Ruby!"
+
+    
+    Then I follow "Hello Rails!"
+    And I should see "Great language!"
+    And I should see "Great framework!"
+
+    
+    #When I follow "Hello Rails!"
+    #Then I should see "Great framework!"
+
+    #When I follow "Hello Rails!"
+    #And I fill in ":merge_with" with "4"
+    #And I press "Merge"    
 
    # Given I am on the new article page
    # When I fill in "article_title" with "Foobar"

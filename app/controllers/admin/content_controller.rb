@@ -2,6 +2,7 @@ require 'base64'
 
 module Admin; end
 class Admin::ContentController < Admin::BaseController
+
   layout "administration", :except => [:show, :autosave]
 
   cache_sweeper :blog_sweeper
@@ -23,6 +24,43 @@ class Admin::ContentController < Admin::BaseController
     end
 
   end
+
+    def merge
+
+    @base_article_id, @other_article_id = params[:base_article], params[:merge_with]
+
+    #begin
+    @article = Article.find(@base_article_id)
+    @article.body = @article.body + ' ' + Article.find(@other_article_id).body
+
+    if @article.save
+
+      ## Handle Comments
+      @feedbacks = Feedback.where(:article_id => [@base_article_id, @other_article_id])
+      @feedbacks.each do |f|
+        f.article_id = @article.id
+        f.save
+    end
+
+      ## Handle merged articles
+      Article.destroy_all(:id => @other_article_id)
+
+      flash[:notice] = _("Article ##{@base_article_id} successfully merged with ##{@other_article_id} into the new Article##{@article.id}!")
+      redirect_to :action => 'index'
+      return
+    #end
+   #rescue
+    #flash[:warning] = _("No such article exists!")
+    #redirect_to :action => 'index'
+  end
+ end
+
+  def merge_with(id_other)
+      
+      self.body = self.body + ' ' + Article.find(id_other).body
+         
+
+  end  
 
   def new
 
@@ -249,30 +287,5 @@ class Admin::ContentController < Admin::BaseController
     @resources = Resource.by_created_at
   end
 
-  def merge
-    @base_article_id, @other_article_id = params[:base_article], params[:merge_with]
-    begin
-    @article = Article.find(@base_article_id).merge_with(@other_article_id)
 
-    if @article.save
-
-      ## Handle Comments
-      @feedbacks = Feedback.where(:article_id => [@base_article_id, @other_article_id])
-      @feedbacks.each do |f|
-        f.article_id = @article.id
-        f.save
-      end
-
-      ## Handle merged articles
-      Article.destroy_all(:id => [@base_article_id, @other_article_id])
-
-      flash[:notice] = _("Article ##{@base_article_id} successfully merged with ##{@other_article_id} into the new Article##{@article.id}!")
-      redirect_to :action => 'index'
-      return
-    end
-  rescue
-    flash[:warning] = _("No such article exists!")
-    redirect_to :action => 'index'
-  end
- end
 end
